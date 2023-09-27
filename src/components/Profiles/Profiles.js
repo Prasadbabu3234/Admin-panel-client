@@ -21,21 +21,37 @@ const imageStyle = {
 export default function Profiles() {
 
   const [profiles, setProfiles] = useState([])
+  const [success, setSuccess] = useState("")
+  
+  const [accesstoken, setAccessToken] = useState("")
 
   const navigate = useNavigate()
 
   const fetchData = () => {
     axios.get(`${url}/profiles`).then((res) => {
-      console.log(res)
       setProfiles(res.data)
     }).catch((err) => {
       console.log(err)
     })
   }
 
+  const handleDelete = (id) => {
+    axios.delete(`${url}/delete/${id}`).then((res) => {
+      console.log(res)
+      if (res.data.acknowledged) {
+        setSuccess("deleted successfully")
+        setTimeout(() => {
+          setSuccess("")
+        }, 2000);
+        navigate('/profiles')
+      }
+    })
+  }
+
 
   useEffect(() => {
     const token = Cookies.get("jwt_token")
+    setAccessToken(token)
     if (!token) {
       navigate('/login')
     }
@@ -44,31 +60,44 @@ export default function Profiles() {
 
   return (
     <div>
+      <nav className='admin-navbar'>
+        <h1>Admin Panel</h1>
+        <div className='d-flex gap-5'>
+          <Link to={'/'} style={{ textDecoration: "none" }}> <span>Home</span></Link>
+          <Link to={'/profiles'} style={{ textDecoration: "none" }}> <span>Profiles</span></Link>
+          {accesstoken === "" ? <Link to={'/login'} style={{ textDecoration: "none" }} > <span>Login</span></Link> : <button className='btn btn-danger' onClick={() => {
+            Cookies.remove("jwt_token")
+            setAccessToken("")
+            navigate('/')
+          }}>Logout</button>}
+        </div>
+      </nav>
       <h1>Profiles</h1>
       <div className='d-flex flex-wrap justify-content-center gap-4'>
-        <div className='d-flex justify-content-center'>{
+        <div>{success.length > 0 && <span>{success}</span>}</div>
+        <div className='d-flex flex-wrap gap-5 justify-content-center'>{
           profiles.map((each) => {
             const { imageData } = each
             return <div className="cards" key={each._id}>
-
-              <div style={{ width: "250px" }}>
+              {!imageData ? <p>No Images</p> : <div style={{ width: "250px" }}>
                 <Carousel autoplay>
                   {imageData.map((eachImage) => {
                     return <div key={eachImage}>
-                      <img src={`data:image/jpeg;base64,${eachImage}`} alt={each.imageName} style={imageStyle} />
+                      <img src={eachImage} alt={each.imageName} style={imageStyle} />
                     </div>
                   })}
 
                 </Carousel>
-              </div>
+              </div>}
+
               <p><b>Name :  </b>{each.name}</p>
               <p><b>Job :  </b>{each.occupation}</p>
-              <button className="btn btn-success" >View & Edit Profile</button>
-              <button className='btn btn-danger mt-2'>Delete</button>
+              <button className="btn btn-success" onClick={() => navigate(`/edit/${each._id}`)}>View & Edit Profile</button>
+              <button className='btn btn-danger mt-2' onClick={() => handleDelete(each._id)}>Delete</button>
             </div>
           })
         }</div>
-        <Link to={'/addprofile'}><div className='add-profile'><Icon.PlusLg height={40} width={40} /><p>Add Profile</p></div></Link>
+        <div className='add-profile' onClick={() => navigate('/addprofile')}><Icon.PlusLg height={40} width={40} /><p>Add Profile</p></div>
       </div>
     </div>
   )

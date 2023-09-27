@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import './AddProfile.css'
+import axios from 'axios'
+import { url } from '../../url'
+import { useNavigate } from 'react-router-dom'
 
 export default function AddProfile() {
 
@@ -23,9 +26,6 @@ export default function AddProfile() {
     const [requirement, setRequirement] = useState("")
     const [marriageStatus, setMarriageStatus] = useState("")
     const [car, setCar] = useState("")
-    const [img1, setImg1] = useState()
-    const [img2, setImg2] = useState()
-    const [img3, setImg3] = useState()
     const [doorNo, setDoorNo] = useState('')
     const [street, setStreet] = useState('')
     const [mandal, setMandal] = useState('')
@@ -35,26 +35,25 @@ export default function AddProfile() {
     const [country, setCountry] = useState('')
     const [image, setImages] = useState([])
 
+    const navigate = useNavigate()
+
 
     const handleImage1 = (e) => {
         // console.log(e.target.files[0])
         const reader = new FileReader()
         reader.readAsDataURL(e.target.files[0])
         reader.onload = () => {
-            console.log(reader.result)
             setImages([...image, reader.result])
         }
         reader.onerror = (err) => {
             console.log(err)
         }
     }
-    console.log(image)
 
     const handleImage2 = (e) => {
         const reader = new FileReader()
         reader.readAsDataURL(e.target.files[0])
         reader.onload = () => {
-            console.log(reader.result)
             setImages([...image, reader.result])
         }
         reader.onerror = (err) => {
@@ -66,7 +65,6 @@ export default function AddProfile() {
         const reader = new FileReader()
         reader.readAsDataURL(e.target.files[0])
         reader.onload = () => {
-            console.log(reader.result)
             setImages([...image, reader.result])
         }
         reader.onerror = (err) => {
@@ -79,9 +77,41 @@ export default function AddProfile() {
         const data = {
             name,
             skin,
-            gender, dob, car
+            gender,
+            dob,
+            car,
+            weight,
+            height,
+            occupation,
+            salary,
+            education,
+            caste,
+            brothers,
+            sisters,
+            mother,
+            father,
+            mobile,
+            familyProperty,
+            selfProperty,
+            requirement,
+            marriageStatus,
+            doorNo,
+            street,
+            mandal,
+            city,
+            pincode,
+            state,
+            country,
+            image
         }
-        console.log(data)
+        axios.post(`${url}/addprofile`,data).then((res) => {
+            console.log(res)
+            if (res.data.acknowledged) {
+                navigate('/profiles')
+            }
+        }).catch((err) => {
+            console.log(err)
+        })
     }
 
 
@@ -93,15 +123,15 @@ export default function AddProfile() {
             <form className='form-add' onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>Name</label>
-                    <input type="text" className="form-control" required onChange={(e) => setName(e.target.value)} />
+                    <input type="text" className="form-control" value={name} required onChange={(e) => setName(e.target.value)} />
                 </div>
                 <div className="form-group">
                     <label>Date Of Birth</label>
-                    <input type='date' className="form-control" required onChange={(e) => setDob(e.target.value)} />
+                    <input type='date' className="form-control" value={dob} required onChange={(e) => setDob(e.target.value)} />
                 </div>
                 <div className="form-group">
                     <label>Skin Color</label>
-                    <input type="text" className="form-control" required onChange={(e) => setSkin(e.target.value)} />
+                    <input type="text" className="form-control" value={skin} required onChange={(e) => setSkin(e.target.value)} />
                 </div>
                 <div className="form-group">
                     <label>Weight</label>
